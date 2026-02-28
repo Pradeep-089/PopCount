@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "pradeep089.github.io.number_bubble_game"
+    namespace = "pradeep089.github.io.pop_count"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -21,7 +21,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "pradeep089.github.io.number_bubble_game"
+        applicationId = "pradeep089.github.io.pop_count"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

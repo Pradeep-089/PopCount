@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
 
 void main() {
-  runApp(const NumberBubbleApp());
+  runApp(const PopCountApp());
 }
 
-class NumberBubbleApp extends StatelessWidget {
-  const NumberBubbleApp({super.key});
+class PopCountApp extends StatelessWidget {
+  const PopCountApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Number Bubble',
-      debugShowCheckedModeBanner: false, // Removes the red debug banner
+      title: 'PopCount',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue),
       home: const HomeScreen(),
     );

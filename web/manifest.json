@@ -1,6 +1,6 @@
 {
-    "name": "number_bubble_game",
-    "short_name": "number_bubble_game",
+    "name": "PopCount",
+    "short_name": "PopCount",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
