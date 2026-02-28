@@ -80,18 +80,20 @@ class _GameScreenState extends State<GameScreen> {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    _hudText('$minutes:$seconds'),
-                                    MistakeIndicator(mistakesCount: state.mistakesCount),
+                                    // Glassmorphism Timer
+                                    _GlassContainer(child: _hudText('$minutes:$seconds')),
+                                    // Glassmorphism Mistakes
+                                    _GlassContainer(child: MistakeIndicator(mistakesCount: state.mistakesCount)),
                                   ],
                                 ),
-                                const SizedBox(height: 5), // Reduced space
+                                const SizedBox(height: 5),
                                 Stack(
                                   alignment: Alignment.center,
                                   children: [
                                     // Soft cloud/abstract shape behind target
                                     Container(
-                                      width: 140,
-                                      height: 100,
+                                      width: 160,
+                                      height: 110,
                                       decoration: BoxDecoration(
                                         color: Colors.white.withOpacity(0.3),
                                         borderRadius: BorderRadius.circular(50),
@@ -121,14 +123,14 @@ class _GameScreenState extends State<GameScreen> {
                         child: ConstrainedBox(
                           constraints: const BoxConstraints(maxWidth: 600, maxHeight: 800),
                           child: AspectRatio(
-                            aspectRatio: 1.0, // Force a square grid
+                            aspectRatio: 1.0, 
                             child: BlocBuilder<GameBloc, GameState>(
                               buildWhen: (previous, current) => current is GamePlaying,
                               builder: (context, state) {
                                 if (state is GamePlaying) {
                                   return GridView.builder(
                                     padding: const EdgeInsets.all(15),
-                                    physics: const NeverScrollableScrollPhysics(), // Grid stays within the square
+                                    physics: const NeverScrollableScrollPhysics(),
                                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                                       crossAxisCount: widget.levelConfig.gridSize,
                                       crossAxisSpacing: 12,
@@ -171,26 +173,36 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 
-  Widget _hudText(String text, {Color color = Colors.white}) {
+  Widget _hudText(String text, {Color color = const Color(0xFF1A1A1A)}) {
     return Text(
       text,
       style: TextStyle(
         fontSize: 24, 
         fontWeight: FontWeight.w900, 
-        color: color.withOpacity(0.8),
-        shadows: [
-          Shadow(color: Colors.black.withOpacity(0.1), blurRadius: 4, offset: const Offset(1, 1))
-        ]
+        color: color,
       ),
     );
   }
 
   void _showScorecard(BuildContext context, GameState state) async {
     final bloc = context.read<GameBloc>();
-    final result = await showDialog<String>(
+    
+    // Improved modal transition with Dim background (0.3 opacity) and Blur
+    final result = await showGeneralDialog<String>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => ScorecardModal(state: state, levelConfig: widget.levelConfig),
+      barrierLabel: 'Scorecard',
+      barrierColor: Colors.black.withOpacity(0.3),
+      transitionDuration: const Duration(milliseconds: 250),
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return ScorecardModal(state: state, levelConfig: widget.levelConfig);
+      },
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: animation,
+          child: child,
+        );
+      },
     );
 
     if (result == 'play_again') {
@@ -198,6 +210,30 @@ class _GameScreenState extends State<GameScreen> {
     } else if (result == 'main_menu') {
       Navigator.of(context).pop();
     }
+  }
+}
+
+class _GlassContainer extends StatelessWidget {
+  final Widget child;
+  const _GlassContainer({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.4),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.white.withOpacity(0.5)),
+          ),
+          child: child,
+        ),
+      ),
+    );
   }
 }
 
@@ -242,13 +278,12 @@ class _NextNumberPulseState extends State<NextNumberPulse> with SingleTickerProv
           child: Stack(
             alignment: Alignment.center,
             children: [
-              // Subtle sparkles around target
               ...List.generate(4, (i) => RotationTransition(
                 turns: AlwaysStoppedAnimation(i * 45 / 360),
                 child: AnimatedBuilder(
                   animation: _pulseController,
                   builder: (context, child) => Opacity(
-                    opacity: 0.3 + (_pulseController.value * 0.4),
+                    opacity: 0.2 + (_pulseController.value * 0.3),
                     child: const Icon(Icons.auto_awesome, color: Colors.white, size: 100),
                   ),
                 ),
@@ -289,10 +324,13 @@ class _NextNumberPulseState extends State<NextNumberPulse> with SingleTickerProv
         Text(
           "Find this number!",
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Colors.black38,
-            letterSpacing: 1.1,
+            color: const Color(0xFF1A1A1A),
+            letterSpacing: 1.2,
+            shadows: [
+              Shadow(color: Colors.white.withOpacity(0.5), blurRadius: 4, offset: const Offset(0, 1))
+            ],
           ),
         ),
       ],
@@ -311,7 +349,6 @@ class MistakeIndicator extends StatefulWidget {
 class _MistakeIndicatorState extends State<MistakeIndicator> with TickerProviderStateMixin {
   late AnimationController _shakeController;
   late Animation<double> _shakeAnimation;
-  late AnimationController _popController;
 
   @override
   void initState() {
@@ -326,11 +363,6 @@ class _MistakeIndicatorState extends State<MistakeIndicator> with TickerProvider
       TweenSequenceItem(tween: Tween(begin: -5.0, end: 5.0), weight: 1),
       TweenSequenceItem(tween: Tween(begin: 5.0, end: 0.0), weight: 1),
     ]).animate(_shakeController);
-
-    _popController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 400),
-    );
   }
 
   @override
@@ -338,14 +370,12 @@ class _MistakeIndicatorState extends State<MistakeIndicator> with TickerProvider
     super.didUpdateWidget(oldWidget);
     if (widget.mistakesCount > oldWidget.mistakesCount) {
       _shakeController.forward(from: 0);
-      _popController.forward(from: 0);
     }
   }
 
   @override
   void dispose() {
     _shakeController.dispose();
-    _popController.dispose();
     super.dispose();
   }
 
@@ -359,41 +389,27 @@ class _MistakeIndicatorState extends State<MistakeIndicator> with TickerProvider
           child: child,
         );
       },
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(25),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.4),
-              borderRadius: BorderRadius.circular(25),
-              border: Border.all(color: Colors.white.withOpacity(0.5)),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: List.generate(3, (index) {
+          final isFull = index < (3 - widget.mistakesCount);
+          return AnimatedOpacity(
+            duration: const Duration(milliseconds: 400),
+            opacity: isFull ? 1.0 : 0.0,
+            child: AnimatedScale(
+              duration: const Duration(milliseconds: 400),
+              scale: isFull ? 1.0 : 1.5,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 3),
+                child: Icon(
+                  Icons.favorite_rounded,
+                  color: Colors.redAccent.withOpacity(0.8),
+                  size: 24,
+                ),
+              ),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: List.generate(3, (index) {
-                final isFull = index < (3 - widget.mistakesCount);
-                return AnimatedOpacity(
-                  duration: const Duration(milliseconds: 400),
-                  opacity: isFull ? 1.0 : 0.0,
-                  child: AnimatedScale(
-                    duration: const Duration(milliseconds: 400),
-                    scale: isFull ? 1.0 : 1.5,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 3),
-                      child: Icon(
-                        Icons.favorite_rounded,
-                        color: Colors.redAccent.withOpacity(0.8),
-                        size: 24,
-                      ),
-                    ),
-                  ),
-                );
-              }),
-            ),
-          ),
-        ),
+          );
+        }),
       ),
     );
   }
@@ -532,7 +548,6 @@ class _GameBubbleState extends State<GameBubble> with TickerProviderStateMixin {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // Soft outer glow for unpopped bubbles
             if (!widget.cell.isPopped)
               Container(
                 width: 65,
@@ -565,7 +580,6 @@ class _GameBubbleState extends State<GameBubble> with TickerProviderStateMixin {
                 ),
                 child: Stack(
                   children: [
-                    // Inner highlight (toy-like)
                     Positioned(
                       top: 8,
                       left: 8,

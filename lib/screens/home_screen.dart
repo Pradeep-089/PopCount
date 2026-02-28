@@ -339,64 +339,117 @@ class MascotBubble extends StatefulWidget {
   State<MascotBubble> createState() => _MascotBubbleState();
 }
 
-class _MascotBubbleState extends State<MascotBubble> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
+class _MascotBubbleState extends State<MascotBubble> with TickerProviderStateMixin {
+  late AnimationController _floatController;
   late Animation<Offset> _floatAnimation;
+  late AnimationController _tapController;
+  late Animation<double> _scaleAnimation;
+  bool _isMessageVisible = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
+    _floatController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
     )..repeat(reverse: true);
 
     _floatAnimation = Tween<Offset>(
       begin: Offset.zero,
-      end: const Offset(0, -0.15),
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+      end: const Offset(0, -0.1),
+    ).animate(CurvedAnimation(parent: _floatController, curve: Curves.easeInOut));
+
+    _tapController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _scaleAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.2), weight: 50),
+      TweenSequenceItem(tween: Tween(begin: 1.2, end: 1.0), weight: 50),
+    ]).animate(CurvedAnimation(parent: _tapController, curve: Curves.elasticOut));
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _floatController.dispose();
+    _tapController.dispose();
     super.dispose();
+  }
+
+  void _onTap() {
+    _tapController.forward(from: 0);
+    setState(() => _isMessageVisible = true);
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) setState(() => _isMessageVisible = false);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return SlideTransition(
-      position: _floatAnimation,
-      child: GestureDetector(
-        onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text("Let's count together! 😊", textAlign: TextAlign.center),
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-              width: 200,
-              duration: const Duration(seconds: 1),
+    return Stack(
+      alignment: Alignment.bottomRight,
+      clipBehavior: Clip.none,
+      children: [
+        // Speech Bubble
+        Positioned(
+          bottom: 80,
+          right: 0,
+          child: AnimatedOpacity(
+            opacity: _isMessageVisible ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 300),
+            child: AnimatedScale(
+              scale: _isMessageVisible ? 1.0 : 0.5,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOutBack,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(color: Colors.black12, blurRadius: 10, offset: const Offset(0, 4)),
+                  ],
+                ),
+                child: const Text(
+                  "Let's count together! 😊",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF2D2D2D),
+                  ),
+                ),
+              ),
             ),
-          );
-        },
-        child: Container(
-          width: 70,
-          height: 70,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: RadialGradient(
-              colors: [Colors.blue.shade300, Colors.blue.shade700],
-              center: const Alignment(-0.3, -0.3),
-            ),
-            boxShadow: const [
-              BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, 5)),
-            ],
-          ),
-          child: const Center(
-            child: Icon(Icons.sentiment_satisfied_alt_rounded, color: Colors.white, size: 45),
           ),
         ),
-      ),
+        // Mascot
+        SlideTransition(
+          position: _floatAnimation,
+          child: ScaleTransition(
+            scale: _scaleAnimation,
+            child: GestureDetector(
+              onTap: _onTap,
+              child: Container(
+                width: 75,
+                height: 75,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [Colors.blue.shade300, Colors.blue.shade700],
+                    center: const Alignment(-0.3, -0.3),
+                  ),
+                  boxShadow: const [
+                    BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, 5)),
+                  ],
+                ),
+                child: const Center(
+                  child: Icon(Icons.sentiment_satisfied_alt_rounded, color: Colors.white, size: 50),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
