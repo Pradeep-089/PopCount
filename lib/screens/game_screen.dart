@@ -80,7 +80,11 @@ class GameScreen extends StatelessWidget {
                                     itemCount: state.grid.length,
                                     itemBuilder: (context, index) {
                                       final cell = state.grid[index];
-                                      return _buildBubble(context, cell);
+                                      return GameBubble(
+                                        cell: cell,
+                                        expectedNumber: state.expectedNumber,
+                                        onTap: () => context.read<GameBloc>().add(BubbleTappedEvent(cell)),
+                                      );
                                     },
                                   );
                                 }
@@ -97,39 +101,6 @@ class GameScreen extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBubble(BuildContext context, dynamic cell) {
-    return GestureDetector(
-      onTap: () => context.read<GameBloc>().add(BubbleTappedEvent(cell)),
-      child: AnimatedOpacity(
-        opacity: cell.isPopped ? 0.2 : 1.0,
-        duration: const Duration(milliseconds: 200),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.pink,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.black, width: 2),
-            boxShadow: cell.isPopped ? [] : [
-              const BoxShadow(color: Colors.black26, offset: Offset(2, 2), blurRadius: 2)
-            ],
-          ),
-          child: Center(
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                '${cell.value}',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w900,
-                  color: cell.isPopped ? Colors.transparent : Colors.black87,
-                ),
-              ),
-            ),
-          ),
         ),
       ),
     );
@@ -321,6 +292,131 @@ class _MistakeIndicatorState extends State<MistakeIndicator> with SingleTickerPr
               ),
             );
           }),
+        ),
+      ),
+    );
+  }
+}
+
+class GameBubble extends StatefulWidget {
+  final dynamic cell;
+  final int expectedNumber;
+  final VoidCallback onTap;
+
+  const GameBubble({
+    super.key,
+    required this.cell,
+    required this.expectedNumber,
+    required this.onTap,
+  });
+
+  @override
+  State<GameBubble> createState() => _GameBubbleState();
+}
+
+class _GameBubbleState extends State<GameBubble> with TickerProviderStateMixin {
+  late AnimationController _correctController;
+  late AnimationController _wrongController;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _shakeAnimation;
+  late Animation<double> _sparkleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _correctController = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
+    _scaleAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.2), weight: 50),
+      TweenSequenceItem(tween: Tween(begin: 1.2, end: 1.0), weight: 50),
+    ]).animate(_correctController);
+    _sparkleAnimation = Tween<double>(begin: 0.0, end: 1.5).animate(
+      CurvedAnimation(parent: _correctController, curve: Curves.easeOut),
+    );
+
+    _wrongController = AnimationController(vsync: this, duration: const Duration(milliseconds: 400));
+    _shakeAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: 4.0), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: 4.0, end: -4.0), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: -4.0, end: 4.0), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: 4.0, end: 0.0), weight: 1),
+    ]).animate(_wrongController);
+  }
+
+  void _handleTap() {
+    if (widget.cell.isPopped) return;
+    if (widget.cell.value == widget.expectedNumber) {
+      _correctController.forward(from: 0);
+    } else {
+      _wrongController.forward(from: 0);
+    }
+    widget.onTap();
+  }
+
+  @override
+  void dispose() {
+    _correctController.dispose();
+    _wrongController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: Listenable.merge([_correctController, _wrongController]),
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(_shakeAnimation.value, 0),
+          child: Transform.scale(
+            scale: _scaleAnimation.value,
+            child: child,
+          ),
+        );
+      },
+      child: GestureDetector(
+        onTap: _handleTap,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            AnimatedOpacity(
+              opacity: widget.cell.isPopped ? 0.0 : 1.0,
+              duration: const Duration(milliseconds: 300),
+              child: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [Colors.pinkAccent.shade100, Colors.pink],
+                    center: const Alignment(-0.3, -0.3),
+                  ),
+                  border: Border.all(color: Colors.white, width: 3),
+                  boxShadow: const [
+                    BoxShadow(color: Colors.black26, offset: Offset(0, 4), blurRadius: 4)
+                  ],
+                ),
+                child: Center(
+                  child: FittedBox(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        '${widget.cell.value}',
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            FadeTransition(
+              opacity: _correctController.drive(Tween(begin: 0.0, end: 1.0).chain(CurveTween(curve: const Interval(0, 0.5)))),
+              child: ScaleTransition(
+                scale: _sparkleAnimation,
+                child: const Icon(Icons.star_rounded, color: Colors.yellowAccent, size: 40),
+              ),
+            ),
+          ],
         ),
       ),
     );
