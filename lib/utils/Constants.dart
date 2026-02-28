@@ -4,46 +4,25 @@ import '../models/level_config.dart';
 class GameConstants {
   static const List<LevelConfig> levels = [
     LevelConfig(
-      name: 'Baby Steps',
-      gridSize: 2,
+      name: 'Little Learner',
+      gridSize: 3, // ~2x2 to 3x3 layout
       bombCount: 0,
-      timeLimitSeconds: 0, // Stopwatch mode
+      timeLimitSeconds: 0, 
       basePoints: 10,
     ),
     LevelConfig(
-      name: 'Little Learner',
-      gridSize: 3,
+      name: 'Growing Star',
+      gridSize: 4, // ~3x3 to 4x4 layout
       bombCount: 0,
       timeLimitSeconds: 0,
       basePoints: 20,
     ),
     LevelConfig(
-      name: 'Growing Up',
-      gridSize: 4,
+      name: 'Super Counter',
+      gridSize: 5, // ~4x4 to 5x5 layout
       bombCount: 0,
       timeLimitSeconds: 0,
       basePoints: 30,
-    ),
-    LevelConfig(
-      name: 'Kindergarten',
-      gridSize: 5,
-      bombCount: 0,
-      timeLimitSeconds: 0,
-      basePoints: 40,
-    ),
-    LevelConfig(
-      name: 'School Age',
-      gridSize: 6,
-      bombCount: 0,
-      timeLimitSeconds: 0,
-      basePoints: 50,
-    ),
-    LevelConfig(
-      name: 'Math Whiz',
-      gridSize: 8,
-      bombCount: 0,
-      timeLimitSeconds: 0,
-      basePoints: 60,
     ),
   ];
 
