@@ -1,4 +1,4 @@
-package pradeep089.github.io.number_bubble_game;
+package pradeep089.github.io.pop_count;
 
 import io.flutter.embedding.android.FlutterActivity;
 

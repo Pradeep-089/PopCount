@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'game_screen.dart';
 import '../utils/Constants.dart';
 import '../models/level_config.dart';
@@ -13,6 +14,28 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   LevelConfig? selectedLevel;
+  bool isSoundEnabled = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSoundPreference();
+  }
+
+  Future<void> _loadSoundPreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      isSoundEnabled = prefs.getBool('isSoundEnabled') ?? true;
+    });
+  }
+
+  Future<void> _toggleSound() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      isSoundEnabled = !isSoundEnabled;
+      prefs.setBool('isSoundEnabled', isSoundEnabled);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -96,6 +119,26 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           
+          // Sound Toggle Icon Button (Top Right)
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 10,
+            right: 20,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: IconButton(
+                icon: Icon(
+                  isSoundEnabled ? Icons.volume_up_rounded : Icons.volume_off_rounded,
+                  color: Colors.white,
+                  size: 32,
+                ),
+                onPressed: _toggleSound,
+              ),
+            ),
+          ),
+
           // Mascot
           const Positioned(
             bottom: 30,
