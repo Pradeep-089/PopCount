@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 
 class AnimatedBackground extends StatefulWidget {
@@ -11,54 +12,29 @@ class AnimatedBackground extends StatefulWidget {
 class _AnimatedBackgroundState extends State<AnimatedBackground>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<Alignment> _topAlignmentAnimation;
-  late Animation<Alignment> _bottomAlignmentAnimation;
+  final List<_FloatingBlob> _blobs = [];
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 10),
-    )..repeat(reverse: true);
+      duration: const Duration(seconds: 20),
+    )..repeat();
 
-    _topAlignmentAnimation = TweenSequence<Alignment>([
-      TweenSequenceItem(
-        tween: Tween<Alignment>(begin: Alignment.topLeft, end: Alignment.topRight),
-        weight: 1,
-      ),
-      TweenSequenceItem(
-        tween: Tween<Alignment>(begin: Alignment.topRight, end: Alignment.bottomRight),
-        weight: 1,
-      ),
-      TweenSequenceItem(
-        tween: Tween<Alignment>(begin: Alignment.bottomRight, end: Alignment.bottomLeft),
-        weight: 1,
-      ),
-      TweenSequenceItem(
-        tween: Tween<Alignment>(begin: Alignment.bottomLeft, end: Alignment.topLeft),
-        weight: 1,
-      ),
-    ]).animate(_controller);
-
-    _bottomAlignmentAnimation = TweenSequence<Alignment>([
-      TweenSequenceItem(
-        tween: Tween<Alignment>(begin: Alignment.bottomRight, end: Alignment.bottomLeft),
-        weight: 1,
-      ),
-      TweenSequenceItem(
-        tween: Tween<Alignment>(begin: Alignment.bottomLeft, end: Alignment.topLeft),
-        weight: 1,
-      ),
-      TweenSequenceItem(
-        tween: Tween<Alignment>(begin: Alignment.topLeft, end: Alignment.topRight),
-        weight: 1,
-      ),
-      TweenSequenceItem(
-        tween: Tween<Alignment>(begin: Alignment.topRight, end: Alignment.bottomRight),
-        weight: 1,
-      ),
-    ]).animate(_controller);
+    final random = Random();
+    for (int i = 0; i < 6; i++) {
+      _blobs.add(_FloatingBlob(
+        color: [
+          Colors.blue.withOpacity(0.05),
+          Colors.pink.withOpacity(0.05),
+          Colors.yellow.withOpacity(0.05),
+        ][random.nextInt(3)],
+        size: 150.0 + random.nextDouble() * 150.0,
+        initialOffset: Offset(random.nextDouble(), random.nextDouble()),
+        speed: 0.2 + random.nextDouble() * 0.3,
+      ));
+    }
   }
 
   @override
@@ -73,20 +49,55 @@ class _AnimatedBackgroundState extends State<AnimatedBackground>
       animation: _controller,
       builder: (context, child) {
         return Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             gradient: LinearGradient(
-              begin: _topAlignmentAnimation.value,
-              end: _bottomAlignmentAnimation.value,
-              colors: const [
-                Color(0xFF121212), // Deep Black
-                Color(0xFF2C003E), // Dark Purple
-                Color(0xFF510A32), // Wine Red
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFFF0F9FF), // Very Soft Blue
+                Color(0xFFFFF5F8), // Very Soft Pink
+                Color(0xFFFEFEF0), // Very Soft Yellow
               ],
             ),
           ),
-          child: widget.child,
+          child: Stack(
+            children: [
+              ..._blobs.map((blob) {
+                final x = (blob.initialOffset.dx + _controller.value * blob.speed) % 1.0;
+                final y = (blob.initialOffset.dy + sin(_controller.value * pi * 2) * 0.1) % 1.0;
+                
+                return Positioned(
+                  left: x * MediaQuery.of(context).size.width - blob.size / 2,
+                  top: y * MediaQuery.of(context).size.height - blob.size / 2,
+                  child: Container(
+                    width: blob.size,
+                    height: blob.size,
+                    decoration: BoxDecoration(
+                      color: blob.color,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                );
+              }),
+              widget.child,
+            ],
+          ),
         );
       },
     );
   }
+}
+
+class _FloatingBlob {
+  final Color color;
+  final double size;
+  final Offset initialOffset;
+  final double speed;
+
+  _FloatingBlob({
+    required this.color,
+    required this.size,
+    required this.initialOffset,
+    required this.speed,
+  });
 }
