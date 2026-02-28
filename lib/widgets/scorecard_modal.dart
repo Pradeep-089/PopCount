@@ -15,7 +15,7 @@ class ScorecardModal extends StatelessWidget {
     String reason = '';
     Color titleColor = Colors.black;
     String tier = 'N/A';
-    String timeRemaining = '00:00';
+    String timeDisplay = '00:00';
 
     if (state is GameWon) {
       final s = state as GameWon;
@@ -24,14 +24,21 @@ class ScorecardModal extends StatelessWidget {
       titleColor = Colors.green;
       tier = s.tier;
       
-      final minutes = (s.finalRemainingTime ~/ 60).toString().padLeft(2, '0');
-      final seconds = (s.finalRemainingTime % 60).toString().padLeft(2, '0');
-      timeRemaining = '$minutes:$seconds';
+      final minutes = (s.totalTime ~/ 60).toString().padLeft(2, '0');
+      final seconds = (s.totalTime % 60).toString().padLeft(2, '0');
+      timeDisplay = '$minutes:$seconds';
     } else if (state is GameLost) {
       final s = state as GameLost;
-      resultTitle = 'GAME OVER';
-      reason = s.reason == FailureReason.timeout ? 'Time Out' : 'Hit a Bomb';
-      titleColor = Colors.red;
+      resultTitle = 'OH NO!';
+      titleColor = Colors.orange;
+      
+      if (s.reason == FailureReason.mistakesExceeded) {
+        reason = "Too many oopsies! Let's try again!";
+      } else if (s.reason == FailureReason.timeout) {
+        reason = 'Time Out';
+      } else {
+        reason = 'Hit a Bomb';
+      }
     }
 
     return Dialog(
@@ -52,20 +59,23 @@ class ScorecardModal extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            Text(reason, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
+            Text(
+              reason, 
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+            ),
             const Divider(height: 40, thickness: 2),
             
-            Text(
-              'Time Remaining: $timeRemaining',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            
-            if (state is GameWon)
+            if (state is GameWon) ...[
+              Text(
+                'Total Time: $timeDisplay',
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
               Padding(
                 padding: const EdgeInsets.only(top: 20),
                 child: Column(
                   children: [
-                    const Text('FINAL RANK', style: TextStyle(fontSize: 12, letterSpacing: 4, fontWeight: FontWeight.bold)),
+                    const Text('REWARD', style: TextStyle(fontSize: 12, letterSpacing: 4, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 5),
                     Text(
                       tier,
@@ -79,6 +89,7 @@ class ScorecardModal extends StatelessWidget {
                   ],
                 ),
               ),
+            ],
             
             const SizedBox(height: 40),
             Row(
@@ -92,7 +103,7 @@ class ScorecardModal extends StatelessWidget {
                     ),
                     onPressed: () => Navigator.of(context).pop('play_again'),
                     child: const Text(
-                      'PLAY AGAIN', 
+                      'TRY AGAIN', 
                       style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, letterSpacing: 1),
                     ),
                   ),
@@ -107,7 +118,7 @@ class ScorecardModal extends StatelessWidget {
                     ),
                     onPressed: () => Navigator.of(context).pop('main_menu'),
                     child: const Text(
-                      'MAIN MENU', 
+                      'EXIT',
                       style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w900, letterSpacing: 1),
                     ),
                   ),

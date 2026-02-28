@@ -3,7 +3,7 @@ import 'package:equatable/equatable.dart';
 import '../models/cell_data.dart';
 import '../models/level_config.dart';
 
-enum FailureReason { timeout, detonated }
+enum FailureReason { timeout, detonated, mistakesExceeded }
 
 abstract class GameState extends Equatable {
   const GameState();
@@ -17,35 +17,37 @@ class GameInitial extends GameState {}
 class GamePlaying extends GameState {
   final List<CellData> grid;
   final int expectedNumber;
-  final int remainingTime;
+  final int elapsedTime; // Changed from remainingTime to elapsedTime for stopwatch behavior
+  final int mistakesCount; // Added for the "Oopsie Meter"
   final int maxTarget;
-  final LevelConfig levelConfig; // Added for tier calculation
+  final LevelConfig levelConfig;
 
   const GamePlaying({
     required this.grid,
     required this.expectedNumber,
-    required this.remainingTime,
+    required this.elapsedTime,
+    required this.mistakesCount,
     required this.maxTarget,
     required this.levelConfig,
   });
 
   @override
-  List<Object?> get props => [grid, expectedNumber, remainingTime, maxTarget, levelConfig];
+  List<Object?> get props => [grid, expectedNumber, elapsedTime, mistakesCount, maxTarget, levelConfig];
 }
 
 class GameWon extends GameState {
-  final int finalRemainingTime;
+  final int totalTime;
   final int totalPoints;
   final String tier;
 
   const GameWon({
-    required this.finalRemainingTime,
+    required this.totalTime,
     required this.totalPoints,
     required this.tier,
   });
 
   @override
-  List<Object?> get props => [finalRemainingTime, totalPoints, tier];
+  List<Object?> get props => [totalTime, totalPoints, tier];
 }
 
 class GameLost extends GameState {

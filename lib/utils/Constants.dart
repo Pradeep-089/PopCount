@@ -1,61 +1,57 @@
+
 import '../models/level_config.dart';
 
 class GameConstants {
   static const List<LevelConfig> levels = [
     LevelConfig(
-      name: 'ChildsPlay',
+      name: 'Baby Steps',
       gridSize: 2,
       bombCount: 0,
-      timeLimitSeconds: 15,
+      timeLimitSeconds: 0, // Stopwatch mode
       basePoints: 10,
     ),
     LevelConfig(
-      name: 'Easy',
+      name: 'Little Learner',
       gridSize: 3,
       bombCount: 0,
-      timeLimitSeconds: 30,
+      timeLimitSeconds: 0,
       basePoints: 20,
     ),
     LevelConfig(
-      name: 'Medium',
+      name: 'Growing Up',
       gridSize: 4,
-      bombCount: 3,
-      timeLimitSeconds: 45,
+      bombCount: 0,
+      timeLimitSeconds: 0,
       basePoints: 30,
     ),
     LevelConfig(
-      name: 'Hard',
+      name: 'Kindergarten',
       gridSize: 5,
-      bombCount: 5,
-      timeLimitSeconds: 60,
+      bombCount: 0,
+      timeLimitSeconds: 0,
       basePoints: 40,
     ),
     LevelConfig(
-      name: 'Expert',
+      name: 'School Age',
       gridSize: 6,
-      bombCount: 8,
-      timeLimitSeconds: 80,
+      bombCount: 0,
+      timeLimitSeconds: 0,
       basePoints: 50,
     ),
     LevelConfig(
-      name: 'NightMare',
-      gridSize: 10,
-      bombCount: 25,
-      timeLimitSeconds: 180,
+      name: 'Math Whiz',
+      gridSize: 8,
+      bombCount: 0,
+      timeLimitSeconds: 0,
       basePoints: 60,
     ),
   ];
 
-  static const Map<int, String> tierRankings = {
-    100: 'Aimbot',
-    90: 'Cracked',
-    80: 'Sweaty',
-    70: 'Clutch',
-    60: 'Tryhard',
-    50: 'Gamer',
-    40: 'Casual',
-    30: 'Bot',
-    20: 'NPC',
-    10: 'Noob',
-  };
+  static const List<String> childFriendlyRanks = [
+    'Super Star!',
+    'Great Job!',
+    'Awesome!',
+    'Well Done!',
+    'Keep It Up!',
+  ];
 }

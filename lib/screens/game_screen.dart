@@ -33,23 +33,38 @@ class GameScreen extends StatelessWidget {
                     // HUD
                     BlocBuilder<GameBloc, GameState>(
                       buildWhen: (previous, current) => 
-                        current is GamePlaying && (previous is! GamePlaying || previous.remainingTime != current.remainingTime || previous.expectedNumber != current.expectedNumber),
+                        current is GamePlaying && (previous is! GamePlaying || previous.elapsedTime != current.elapsedTime || previous.expectedNumber != current.expectedNumber || previous.mistakesCount != current.mistakesCount),
                       builder: (context, state) {
                         if (state is GamePlaying) {
-                          final minutes = (state.remainingTime ~/ 60).toString().padLeft(2, '0');
-                          final seconds = (state.remainingTime % 60).toString().padLeft(2, '0');
+                          final minutes = (state.elapsedTime ~/ 60).toString().padLeft(2, '0');
+                          final seconds = (state.elapsedTime % 60).toString().padLeft(2, '0');
                           return Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            child: Column(
                               children: [
-                                _hudText('TIME: $minutes:$seconds'),
-                                _hudText('NEXT: ${state.expectedNumber}', color: Colors.pinkAccent),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    _hudText('TIME: $minutes:$seconds'),
+                                    _hudText('NEXT: ${state.expectedNumber}', color: Colors.pinkAccent),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: List.generate(3, (index) {
+                                    return Icon(
+                                      index < (3 - state.mistakesCount) ? Icons.favorite : Icons.favorite_border,
+                                      color: Colors.redAccent,
+                                      size: 30,
+                                    );
+                                  }),
+                                ),
                               ],
                             ),
                           );
                         }
-                        return const SizedBox(height: 70);
+                        return const SizedBox(height: 110);
                       },
                     ),
                     
@@ -116,7 +131,7 @@ class GameScreen extends StatelessWidget {
             child: FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
-                cell.isBomb ? '💣' : '${cell.value}',
+                '${cell.value}',
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w900,
