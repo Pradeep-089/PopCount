@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/game_bloc.dart';
@@ -318,9 +319,12 @@ class GameBubble extends StatefulWidget {
 class _GameBubbleState extends State<GameBubble> with TickerProviderStateMixin {
   late AnimationController _correctController;
   late AnimationController _wrongController;
+  late AnimationController _hintController;
   late Animation<double> _scaleAnimation;
   late Animation<double> _shakeAnimation;
   late Animation<double> _sparkleAnimation;
+  late Animation<double> _hintAnimation;
+  Timer? _hintTimer;
 
   @override
   void initState() {
@@ -341,6 +345,32 @@ class _GameBubbleState extends State<GameBubble> with TickerProviderStateMixin {
       TweenSequenceItem(tween: Tween(begin: -4.0, end: 4.0), weight: 1),
       TweenSequenceItem(tween: Tween(begin: 4.0, end: 0.0), weight: 1),
     ]).animate(_wrongController);
+
+    // Initialize Hint Animation
+    _hintController = AnimationController(vsync: this, duration: const Duration(milliseconds: 1000));
+    _hintAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.05).chain(CurveTween(curve: Curves.easeInOut)), weight: 50),
+      TweenSequenceItem(tween: Tween(begin: 1.05, end: 1.0).chain(CurveTween(curve: Curves.easeInOut)), weight: 50),
+    ]).animate(_hintController);
+
+    _startHintTimer();
+  }
+
+  void _startHintTimer() {
+    _stopHint();
+    if (!widget.cell.isPopped && widget.cell.value == widget.expectedNumber) {
+      _hintTimer = Timer(const Duration(seconds: 5), () {
+        if (mounted) {
+          _hintController.repeat();
+        }
+      });
+    }
+  }
+
+  void _stopHint() {
+    _hintTimer?.cancel();
+    _hintController.stop();
+    _hintController.reset();
   }
 
   @override
@@ -351,10 +381,15 @@ class _GameBubbleState extends State<GameBubble> with TickerProviderStateMixin {
       _correctController.reset();
       _wrongController.reset();
     }
+    // Reset hint timer whenever the state changes (expected number or pop status)
+    if (oldWidget.expectedNumber != widget.expectedNumber || oldWidget.cell.isPopped != widget.cell.isPopped) {
+      _startHintTimer();
+    }
   }
 
   void _handleTap() {
     if (widget.cell.isPopped) return;
+    _stopHint();
     if (widget.cell.value == widget.expectedNumber) {
       _correctController.forward(from: 0);
     } else {
@@ -365,20 +400,22 @@ class _GameBubbleState extends State<GameBubble> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    _hintTimer?.cancel();
     _correctController.dispose();
     _wrongController.dispose();
+    _hintController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: Listenable.merge([_correctController, _wrongController]),
+      animation: Listenable.merge([_correctController, _wrongController, _hintController]),
       builder: (context, child) {
         return Transform.translate(
           offset: Offset(_shakeAnimation.value, 0),
           child: Transform.scale(
-            scale: _scaleAnimation.value,
+            scale: _scaleAnimation.value * _hintAnimation.value,
             child: child,
           ),
         );
