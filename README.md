@@ -1,22 +1,22 @@
-# Number Bubble Game
+# PopCount
 
-A 2D mobile puzzle and reaction game built with Flutter.
+A fast-paced 2D reaction game built with Flutter. Test your speed and focus by popping numbered bubbles in sequence!
 
 ---
 
 ## Business Requirements Document (BRD)
-**Project Name:** Number Bubble  
-**Platform:** Mobile (Android/iOS via Flutter)  
+**Project Name:** PopCount
+**Platform:** Mobile (Android/iOS via Flutter) & Web
 **Version:** 2.0 (Updated with Bombs, Timer, and Point-Based Tier System)
 
 ### 1. Executive Summary
-"Number Bubble" is a 2D mobile puzzle and reaction game designed to test a user's peripheral vision, speed, and focus under pressure. Players must find and pop numbered bubbles in a randomized NXN grid in sequential order before a countdown timer expires.
+"PopCount" is a reaction game designed to test a user's peripheral vision, speed, and focus. Players must find and pop numbered bubbles in a randomized grid in sequential order before the timer expires.
 
 ### 2. Core Objectives
 - Deliver a highly responsive, zero-latency touch experience.
 - Implement a dynamically scaling difficulty system.
 - Create a high-stakes gameplay loop with instant-fail "Bomb" cells.
-- Reward players with gamer ranks based on a 100-point calculation system.
+- Reward players with ranks based on speed and accuracy.
 
 ### 3. Functional Requirements
 #### 3.1. Difficulty Selection
@@ -31,49 +31,20 @@ A 2D mobile puzzle and reaction game built with Flutter.
 
 #### 3.2. Gameplay Rules
 - **Correct Tap:** Increments `expectedNumber` and pops the bubble.
-- **Wrong Tap (Penalty):** Resets `expectedNumber` to 1 and reshuffles the grid.
-- **Bomb Tap (Fatal):** Immediate "Loss State".
-- **Time Out (Fatal):** Immediate "Loss State".
-
-### 4. 100-Point Tier System
-Rank is calculated upon Victory: **Base Points + Speed Bonus**.
-- **S-Rank Speed (> 70% time left):** +40 pts
-- **A-Rank Speed (> 40% time left):** +30 pts
-- **B-Rank Speed (> 10% time left):** +20 pts
-- **C-Rank Speed (< 10% time left):** +10 pts
-
-**Rankings:**
-- 100: Aimbot
-- 90: Cracked
-- 80: Sweaty
-- 70: Clutch
-- 60: Tryhard
-- 50: Gamer
-- 40: Casual
-- 30: Bot
-- 20: NPC
-- 10: Noob
+- **Wrong Tap:** Resets sequence and reshuffles the grid.
+- **Bomb Tap:** Immediate Game Over.
+- **Time Out:** Immediate Game Over.
 
 ---
 
 ## Technical Design Document (TDD)
-**Architecture Pattern:** BLoC (Business Logic Component) / Strict FSM  
+**Architecture Pattern:** BLoC (Business Logic Component)
 **Version:** 4.0
 
 ### 1. System Architecture
-- **The UI (View):** Flutter widgets dispatch Events to the BLoC and listen to States.
-- **The BLoC (Controller):** Manages game loop, timer stream, and yields distinct States.
-- **Finite State Machine (FSM):** Strict state enforcement (Initial, Playing, Won, Lost).
-
-### 2. Core Engine (GameBloc)
-- **Events:** `GameStartedEvent`, `BubbleTappedEvent`, `TimerTickedEvent`.
-- **States:** `GameInitial`, `GamePlaying`, `GameWon`, `GameLost`.
-- **Algorithms:** $O(N)$ Fisher-Yates shuffle for grid generation and penalty reshuffling.
-
-### 3. UI Strategy
-- **BlocBuilder:** Localized rebuilds for Grid and Timer for 60 FPS performance.
-- **BlocListener:** Triggers the `ScorecardModal` overlay on Win/Loss.
-- **Responsive Design:** AspectRatio-locked square grid with max-width constraints for Web/Desktop.
+- **View:** Flutter widgets dispatch events and listen to states.
+- **BLoC:** Manages game loop, timer stream, and yields states.
+- **FSM:** Strict state enforcement (Initial, Playing, Won, Lost).
 
 ---
 
