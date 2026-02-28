@@ -81,6 +81,7 @@ class GameScreen extends StatelessWidget {
                                     itemBuilder: (context, index) {
                                       final cell = state.grid[index];
                                       return GameBubble(
+                                        key: ValueKey('bubble_${cell.id}_${state.mistakesCount == 0 && state.expectedNumber == 1}'),
                                         cell: cell,
                                         expectedNumber: state.expectedNumber,
                                         onTap: () => context.read<GameBloc>().add(BubbleTappedEvent(cell)),
@@ -340,6 +341,16 @@ class _GameBubbleState extends State<GameBubble> with TickerProviderStateMixin {
       TweenSequenceItem(tween: Tween(begin: -4.0, end: 4.0), weight: 1),
       TweenSequenceItem(tween: Tween(begin: 4.0, end: 0.0), weight: 1),
     ]).animate(_wrongController);
+  }
+
+  @override
+  void didUpdateWidget(GameBubble oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Reset animations if the cell resets (New Game)
+    if (oldWidget.cell.isPopped && !widget.cell.isPopped) {
+      _correctController.reset();
+      _wrongController.reset();
+    }
   }
 
   void _handleTap() {
