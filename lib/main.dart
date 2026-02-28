@@ -17,15 +17,28 @@ class PopCountApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blueAccent,
-          primary: Colors.blueAccent,
-          secondary: Colors.pinkAccent,
+          seedColor: const Color(0xFF2196F3),
+          primary: const Color(0xFF2196F3),
+          secondary: const Color(0xFFF06292),
         ),
-        textTheme: GoogleFonts.baloo2TextTheme(), // Child-friendly rounded font
+        // Child-friendly rounded font with improved contrast
+        textTheme: GoogleFonts.baloo2TextTheme().copyWith(
+          displayLarge: GoogleFonts.baloo2(
+            color: const Color(0xFF1A1A1A),
+            fontWeight: FontWeight.w900,
+          ),
+          bodyLarge: GoogleFonts.baloo2(
+            color: const Color(0xFF2D2D2D),
+          ),
+          bodyMedium: GoogleFonts.baloo2(
+            color: const Color(0xFF555555),
+          ),
+        ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
             padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 30),
+            textStyle: const TextStyle(fontWeight: FontWeight.bold),
           ),
         ),
       ),

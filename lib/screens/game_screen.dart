@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../bloc/game_bloc.dart';
 import '../bloc/game_event.dart';
 import '../bloc/game_state.dart';
@@ -10,15 +11,47 @@ import '../models/level_config.dart';
 import '../widgets/animated_background.dart';
 import '../widgets/scorecard_modal.dart';
 
-class GameScreen extends StatelessWidget {
+class GameScreen extends StatefulWidget {
   final LevelConfig levelConfig;
 
   const GameScreen({super.key, required this.levelConfig});
 
   @override
+  State<GameScreen> createState() => _GameScreenState();
+}
+
+class _GameScreenState extends State<GameScreen> {
+  bool _isSoundEnabled = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSoundPreference();
+  }
+
+  Future<void> _loadSoundPreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _isSoundEnabled = prefs.getBool('isSoundEnabled') ?? true;
+    });
+  }
+
+  void _playSuccessSound() {
+    if (_isSoundEnabled) {
+      debugPrint('Playing Success Sound Placeholder');
+    }
+  }
+
+  void _playOopsSound() {
+    if (_isSoundEnabled) {
+      debugPrint('Playing Oops Sound Placeholder');
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => GameBloc()..add(GameStartedEvent(levelConfig)),
+      create: (context) => GameBloc()..add(GameStartedEvent(widget.levelConfig)),
       child: Scaffold(
         body: Stack(
           children: [
@@ -97,7 +130,7 @@ class GameScreen extends StatelessWidget {
                                     padding: const EdgeInsets.all(15),
                                     physics: const NeverScrollableScrollPhysics(), // Grid stays within the square
                                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: levelConfig.gridSize,
+                                      crossAxisCount: widget.levelConfig.gridSize,
                                       crossAxisSpacing: 12,
                                       mainAxisSpacing: 12,
                                     ),
@@ -108,7 +141,14 @@ class GameScreen extends StatelessWidget {
                                         key: ValueKey('bubble_${cell.id}_${state.mistakesCount == 0 && state.expectedNumber == 1}'),
                                         cell: cell,
                                         expectedNumber: state.expectedNumber,
-                                        onTap: () => context.read<GameBloc>().add(BubbleTappedEvent(cell)),
+                                        onTap: () {
+                                          if (cell.value == state.expectedNumber) {
+                                            _playSuccessSound();
+                                          } else if (!cell.isPopped) {
+                                            _playOopsSound();
+                                          }
+                                          context.read<GameBloc>().add(BubbleTappedEvent(cell));
+                                        },
                                       );
                                     },
                                   );
@@ -150,11 +190,11 @@ class GameScreen extends StatelessWidget {
     final result = await showDialog<String>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => ScorecardModal(state: state, levelConfig: levelConfig),
+      builder: (context) => ScorecardModal(state: state, levelConfig: widget.levelConfig),
     );
 
     if (result == 'play_again') {
-      bloc.add(GameStartedEvent(levelConfig));
+      bloc.add(GameStartedEvent(widget.levelConfig));
     } else if (result == 'main_menu') {
       Navigator.of(context).pop();
     }

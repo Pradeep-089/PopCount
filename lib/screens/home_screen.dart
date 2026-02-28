@@ -12,14 +12,21 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
   LevelConfig? selectedLevel;
   bool isSoundEnabled = true;
+  late AnimationController _fadeInController;
+  late Animation<double> _fadeInAnimation;
 
   @override
   void initState() {
     super.initState();
     _loadSoundPreference();
+    _fadeInController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    )..forward();
+    _fadeInAnimation = CurvedAnimation(parent: _fadeInController, curve: Curves.easeIn);
   }
 
   Future<void> _loadSoundPreference() async {
@@ -38,82 +45,112 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
+  void dispose() {
+    _fadeInController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          AnimatedBackground(
-            child: SafeArea(
-              child: Center(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 50),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Logo/Title
-                      const Text(
-                        'PopCount',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 64,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.white,
-                          shadows: [
-                            Shadow(color: Colors.black45, offset: Offset(4, 4), blurRadius: 10),
-                          ],
+          const AnimatedBackground(child: SizedBox.expand()),
+          // Top Overlay Layer for Readability
+          IgnorePointer(
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.4,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.white.withOpacity(0.2),
+                    Colors.white.withOpacity(0.0),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 50),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Fade-in Logo/Title with Pastel Gradient Effect
+                    FadeTransition(
+                      opacity: _fadeInAnimation,
+                      child: ShaderMask(
+                        shaderCallback: (bounds) => const LinearGradient(
+                          colors: [Color(0xFF42A5F5), Color(0xFFEC407A)],
+                        ).createShader(bounds),
+                        child: const Text(
+                          'PopCount',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 64,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            letterSpacing: 2,
+                            shadows: [
+                              Shadow(color: Colors.black12, offset: Offset(2, 2), blurRadius: 6),
+                            ],
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 10),
-                      const Text(
-                        'Tap the numbers in order!',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white70,
-                        ),
+                    ),
+                    const SizedBox(height: 10),
+                    const Text(
+                      'Tap the numbers in order!',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF555555),
                       ),
-                      const SizedBox(height: 60),
+                    ),
+                    const SizedBox(height: 60),
 
-                      // Difficulty Buttons
-                      _DifficultyButton(
-                        level: GameConstants.levels[0],
-                        emoji: '🟢',
-                        color: Colors.greenAccent,
-                        isSelected: selectedLevel == GameConstants.levels[0],
-                        onTap: () => _onLevelSelected(GameConstants.levels[0]),
-                      ),
-                      const SizedBox(height: 20),
-                      _DifficultyButton(
-                        level: GameConstants.levels[1],
-                        emoji: '🟡',
-                        color: Colors.orangeAccent,
-                        isSelected: selectedLevel == GameConstants.levels[1],
-                        onTap: () => _onLevelSelected(GameConstants.levels[1]),
-                      ),
-                      const SizedBox(height: 20),
-                      _DifficultyButton(
-                        level: GameConstants.levels[2],
-                        emoji: '🔵',
-                        color: Colors.blueAccent,
-                        isSelected: selectedLevel == GameConstants.levels[2],
-                        onTap: () => _onLevelSelected(GameConstants.levels[2]),
-                      ),
-                      
-                      const SizedBox(height: 60),
+                    // Difficulty Buttons
+                    _DifficultyButton(
+                      level: GameConstants.levels[0],
+                      emoji: '🟢',
+                      color: Colors.greenAccent,
+                      isSelected: selectedLevel == GameConstants.levels[0],
+                      onTap: () => _onLevelSelected(GameConstants.levels[0]),
+                    ),
+                    const SizedBox(height: 20),
+                    _DifficultyButton(
+                      level: GameConstants.levels[1],
+                      emoji: '🟡',
+                      color: Colors.orangeAccent,
+                      isSelected: selectedLevel == GameConstants.levels[1],
+                      onTap: () => _onLevelSelected(GameConstants.levels[1]),
+                    ),
+                    const SizedBox(height: 20),
+                    _DifficultyButton(
+                      level: GameConstants.levels[2],
+                      emoji: '🔵',
+                      color: Colors.blueAccent,
+                      isSelected: selectedLevel == GameConstants.levels[2],
+                      onTap: () => _onLevelSelected(GameConstants.levels[2]),
+                    ),
+                    
+                    const SizedBox(height: 60),
 
-                      // Start Button
-                      _StartGameButton(
-                        onPressed: selectedLevel == null ? null : () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => GameScreen(levelConfig: selectedLevel!),
-                            ),
-                          ).then((_) => setState(() => selectedLevel = null));
-                        },
-                      ),
-                    ],
-                  ),
+                    // Start Button
+                    _StartGameButton(
+                      onPressed: selectedLevel == null ? null : () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => GameScreen(levelConfig: selectedLevel!),
+                          ),
+                        ).then((_) => setState(() => selectedLevel = null));
+                      },
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -125,13 +162,13 @@ class _HomeScreenState extends State<HomeScreen> {
             right: 20,
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withOpacity(0.4),
                 shape: BoxShape.circle,
               ),
               child: IconButton(
                 icon: Icon(
                   isSoundEnabled ? Icons.volume_up_rounded : Icons.volume_off_rounded,
-                  color: Colors.white,
+                  color: const Color(0xFF2D2D2D),
                   size: 32,
                 ),
                 onPressed: _toggleSound,
@@ -194,7 +231,7 @@ class _DifficultyButton extends StatelessWidget {
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(isSelected ? 0.4 : 0.2),
+                color: Colors.black.withOpacity(isSelected ? 0.2 : 0.1),
                 blurRadius: isSelected ? 15 : 8,
                 offset: const Offset(0, 4),
               ),
@@ -216,7 +253,7 @@ class _DifficultyButton extends StatelessWidget {
                       fontSize: 24,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 1.5,
-                      color: isSelected ? Colors.white : Colors.black87,
+                      color: isSelected ? Colors.white : const Color(0xFF2D2D2D),
                     ),
                   ),
                 ),
@@ -267,7 +304,7 @@ class _StartGameButtonState extends State<_StartGameButton> {
             borderRadius: BorderRadius.circular(40),
             boxShadow: widget.onPressed != null ? [
               BoxShadow(
-                color: Colors.greenAccent.shade700.withOpacity(0.4),
+                color: Colors.greenAccent.shade700.withOpacity(0.3),
                 blurRadius: 15,
                 offset: const Offset(0, 8),
               ),

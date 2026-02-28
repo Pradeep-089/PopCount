@@ -26,9 +26,9 @@ class _AnimatedBackgroundState extends State<AnimatedBackground>
     for (int i = 0; i < 6; i++) {
       _blobs.add(_FloatingBlob(
         color: [
-          Colors.blue.withOpacity(0.05),
-          Colors.pink.withOpacity(0.05),
-          Colors.yellow.withOpacity(0.05),
+          const Color(0xFFE3F2FD).withOpacity(0.15),
+          const Color(0xFFF8BBD0).withOpacity(0.15),
+          const Color(0xFFFFF59D).withOpacity(0.15),
         ][random.nextInt(3)],
         size: 150.0 + random.nextDouble() * 150.0,
         initialOffset: Offset(random.nextDouble(), random.nextDouble()),
@@ -51,12 +51,12 @@ class _AnimatedBackgroundState extends State<AnimatedBackground>
         return Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
               colors: [
-                Color(0xFFF0F9FF), // Very Soft Blue
-                Color(0xFFFFF5F8), // Very Soft Pink
-                Color(0xFFFEFEF0), // Very Soft Yellow
+                Color(0xFFE3F2FD), // Deeper Pastel Blue
+                Color(0xFFF8BBD0), // Deeper Pastel Pink
+                Color(0xFFFFF59D), // Deeper Pastel Yellow
               ],
             ),
           ),
