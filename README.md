@@ -1,55 +1,58 @@
-# PopCount
+# PopCount 🎈
 
-A fast-paced 2D reaction game built with Flutter. Test your speed and focus by popping numbered bubbles in sequence!
-
----
-
-## Business Requirements Document (BRD)
-**Project Name:** PopCount
-**Platform:** Mobile (Android/iOS via Flutter) & Web
-**Version:** 2.0 (Updated with Bombs, Timer, and Point-Based Tier System)
-
-### 1. Executive Summary
-"PopCount" is a reaction game designed to test a user's peripheral vision, speed, and focus. Players must find and pop numbered bubbles in a randomized grid in sequential order before the timer expires.
-
-### 2. Core Objectives
-- Deliver a highly responsive, zero-latency touch experience.
-- Implement a dynamically scaling difficulty system.
-- Create a high-stakes gameplay loop with instant-fail "Bomb" cells.
-- Reward players with ranks based on speed and accuracy.
-
-### 3. Functional Requirements
-#### 3.1. Difficulty Selection
-| Level | Grid Size | Target Sequence | Bombs | Time Limit | Base Points |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| ChildsPlay | 2X2 | 1 to 4 | 0 | 15 seconds | 10 pts |
-| Easy | 3X3 | 1 to 9 | 0 | 30 seconds | 20 pts |
-| Medium | 4X4 | 1 to 13 | 3 | 45 seconds | 30 pts |
-| Hard | 5X5 | 1 to 20 | 5 | 60 seconds | 40 pts |
-| Expert | 6X6 | 1 to 28 | 8 | 80 seconds | 50 pts |
-| NightMare | 10X10 | 1 to 75 | 25 | 180 seconds | 60 pts |
-
-#### 3.2. Gameplay Rules
-- **Correct Tap:** Increments `expectedNumber` and pops the bubble.
-- **Wrong Tap:** Resets sequence and reshuffles the grid.
-- **Bomb Tap:** Immediate Game Over.
-- **Time Out:** Immediate Game Over.
+An accessible, ad-free cognitive development tool designed for early childhood. PopCount helps children ages 3–6 learn sequential counting and improve fine motor skills through positive reinforcement and interactive gameplay.
 
 ---
 
-## Technical Design Document (TDD)
-**Architecture Pattern:** BLoC (Business Logic Component)
-**Version:** 4.0
-
-### 1. System Architecture
-- **View:** Flutter widgets dispatch events and listen to states.
-- **BLoC:** Manages game loop, timer stream, and yields states.
-- **FSM:** Strict state enforcement (Initial, Playing, Won, Lost).
+## 🌟 EdTech Philosophy
+PopCount is built on the principles of **Gentle Learning**:
+- **Zero Anxiety:** No countdown timers. The game uses an ascending stopwatch to track progress without pressure.
+- **Positive Reinforcement:** High-quality animations, sparkles, and a friendly mascot ("Bubble Buddy") encourage the child.
+- **Oopsie Meter:** Instead of "Game Over," children have 3 hearts. Making a mistake is part of learning!
+- **Visual Hints:** Subtle pulsing animations guide the child if they get stuck for more than 5 seconds.
 
 ---
 
-## Getting Started
-1. Ensure Flutter is installed.
-2. Clone this repository.
-3. Run `flutter pub get`.
-4. Run `flutter run`.
+## 🎮 Gameplay Features
+- **3 Difficulty Levels:** 
+  - 🟢 **Little Learner:** Numbers 1–9 (3x3 Grid)
+  - 🟡 **Growing Star:** Numbers 1–16 (4x4 Grid)
+  - 🔵 **Super Counter:** Numbers 1–25 (5x5 Grid)
+- **Interactive Mascot:** Tap our friendly mascot for encouraging messages!
+- **3D Toy-Like UI:** Bubbles feel like soft physical buttons with 3D gradients and inner highlights.
+- **Celebration:** Win a level to see a 3-star rating and a confetti burst!
+
+---
+
+## 🛠 Technical Stack
+- **Framework:** Flutter (Web, Android, iOS)
+- **State Management:** BLoC (Business Logic Component)
+- **Persistence:** SharedPreferences (Saves sound and accessibility preferences)
+- **Animations:** Custom implicit and explicit animations for a "living" UI.
+- **CI/CD:** Automated GitHub Actions for Web deployment and icon generation.
+
+---
+
+## 🚀 Getting Started
+1. **Prerequisites:** Install [Flutter SDK](https://docs.flutter.dev/get-started/install).
+2. **Clone:** `git clone https://github.com/Pradeep-089/PopCount.git`
+3. **Setup:** 
+   ```bash
+   flutter pub get
+   flutter pub run flutter_launcher_icons
+   ```
+4. **Run:** `flutter run -d chrome` (or your preferred device)
+
+---
+
+## 🏗 System Architecture
+PopCount follows a strict **Finite State Machine (FSM)** using BLoC:
+- **GameInitial:** Level selection and preparation.
+- **GamePlaying:** Active counting with mistake tracking and hint timers.
+- **GameWon:** Celebration state with performance metrics.
+- **GameLost:** Gentle "Try Again" state with Oopsie Meter resolution.
+
+---
+
+## 📄 License
+This project is for educational and cognitive development purposes.
