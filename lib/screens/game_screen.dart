@@ -45,15 +45,7 @@ class GameScreen extends StatelessWidget {
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
                                     _hudText('$minutes:$seconds'),
-                                    Row(
-                                      children: List.generate(3, (index) {
-                                        return Icon(
-                                          index < (3 - state.mistakesCount) ? Icons.favorite : Icons.favorite_border,
-                                          color: Colors.redAccent,
-                                          size: 24,
-                                        );
-                                      }),
-                                    ),
+                                    MistakeIndicator(mistakesCount: state.mistakesCount),
                                   ],
                                 ),
                                 const SizedBox(height: 10),
@@ -247,6 +239,90 @@ class _NextNumberPulseState extends State<NextNumberPulse> with SingleTickerProv
           ),
         ),
       ],
+    );
+  }
+}
+
+class MistakeIndicator extends StatefulWidget {
+  final int mistakesCount;
+  const MistakeIndicator({super.key, required this.mistakesCount});
+
+  @override
+  State<MistakeIndicator> createState() => _MistakeIndicatorState();
+}
+
+class _MistakeIndicatorState extends State<MistakeIndicator> with SingleTickerProviderStateMixin {
+  late AnimationController _shakeController;
+  late Animation<double> _shakeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _shakeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+    _shakeAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: 5.0), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: 5.0, end: -5.0), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: -5.0, end: 5.0), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: 5.0, end: 0.0), weight: 1),
+    ]).animate(_shakeController);
+  }
+
+  @override
+  void didUpdateWidget(MistakeIndicator oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.mistakesCount > oldWidget.mistakesCount) {
+      _shakeController.forward(from: 0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _shakeController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _shakeAnimation,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(_shakeAnimation.value, 0),
+          child: child,
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.2),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: List.generate(3, (index) {
+            final isFull = index < (3 - widget.mistakesCount);
+            return AnimatedOpacity(
+              duration: const Duration(milliseconds: 400),
+              opacity: isFull ? 1.0 : 0.0,
+              child: AnimatedScale(
+                duration: const Duration(milliseconds: 400),
+                scale: isFull ? 1.0 : 0.5,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 2),
+                  child: const Icon(
+                    Icons.favorite_rounded,
+                    color: Colors.redAccent,
+                    size: 26,
+                  ),
+                ),
+              ),
+            );
+          }),
+        ),
+      ),
     );
   }
 }
