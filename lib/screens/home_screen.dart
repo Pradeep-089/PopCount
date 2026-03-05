@@ -56,7 +56,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       body: Stack(
         children: [
           const AnimatedBackground(child: SizedBox.expand()),
-          // Top Overlay Layer for Readability
           IgnorePointer(
             child: Container(
               height: MediaQuery.of(context).size.height * 0.4,
@@ -79,7 +78,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Fade-in Logo/Title with Pastel Gradient Effect
                     FadeTransition(
                       opacity: _fadeInAnimation,
                       child: ShaderMask(
@@ -111,12 +109,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       ),
                     ),
                     const SizedBox(height: 60),
-
-                    // Difficulty Buttons
                     _DifficultyButton(
                       level: GameConstants.levels[0],
                       emoji: '🟢',
-                      color: Colors.greenAccent,
+                      color: Colors.green.shade600,
                       isSelected: selectedLevel == GameConstants.levels[0],
                       onTap: () => _onLevelSelected(GameConstants.levels[0]),
                     ),
@@ -124,7 +120,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     _DifficultyButton(
                       level: GameConstants.levels[1],
                       emoji: '🟡',
-                      color: Colors.orangeAccent,
+                      color: Colors.orange.shade600,
                       isSelected: selectedLevel == GameConstants.levels[1],
                       onTap: () => _onLevelSelected(GameConstants.levels[1]),
                     ),
@@ -132,14 +128,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     _DifficultyButton(
                       level: GameConstants.levels[2],
                       emoji: '🔵',
-                      color: Colors.blueAccent,
+                      color: Colors.blue.shade600,
                       isSelected: selectedLevel == GameConstants.levels[2],
                       onTap: () => _onLevelSelected(GameConstants.levels[2]),
                     ),
-                    
                     const SizedBox(height: 60),
-
-                    // Start Button
                     _StartGameButton(
                       onPressed: selectedLevel == null ? null : () {
                         Navigator.push(
@@ -155,8 +148,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               ),
             ),
           ),
-          
-          // Sound Toggle Icon Button (Top Right)
           Positioned(
             top: MediaQuery.of(context).padding.top + 10,
             right: 20,
@@ -175,8 +166,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               ),
             ),
           ),
-
-          // Mascot
           const Positioned(
             bottom: 30,
             right: 30,
@@ -212,18 +201,18 @@ class _DifficultyButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedScale(
-      scale: isSelected ? 1.05 : 1.0,
-      duration: const Duration(milliseconds: 200),
-      curve: Curves.easeInOut,
+      scale: isSelected ? 1.08 : 1.0,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.elasticOut,
       child: GestureDetector(
         onTap: onTap,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
+          duration: const Duration(milliseconds: 300),
           height: 85,
           width: double.infinity,
           constraints: const BoxConstraints(maxWidth: 400),
           decoration: BoxDecoration(
-            color: isSelected ? color : Colors.white.withOpacity(0.9),
+            color: isSelected ? color : Colors.white.withOpacity(0.8),
             borderRadius: BorderRadius.circular(40),
             border: Border.all(
               color: isSelected ? Colors.white : Colors.transparent,
@@ -231,38 +220,41 @@ class _DifficultyButton extends StatelessWidget {
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(isSelected ? 0.2 : 0.1),
-                blurRadius: isSelected ? 15 : 8,
+                color: isSelected ? color.withOpacity(0.4) : Colors.black.withOpacity(0.1),
+                blurRadius: isSelected ? 20 : 8,
                 offset: const Offset(0, 4),
               ),
             ],
           ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 25),
-            child: Row(
-              children: [
-                Text(
-                  emoji,
-                  style: const TextStyle(fontSize: 32),
-                ),
-                const SizedBox(width: 20),
-                Expanded(
-                  child: Text(
-                    level.name.toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 1.5,
-                      color: isSelected ? Colors.white : const Color(0xFF2D2D2D),
+          child: Opacity(
+            opacity: isSelected ? 1.0 : 0.7,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 25),
+              child: Row(
+                children: [
+                  Text(
+                    emoji,
+                    style: const TextStyle(fontSize: 32),
+                  ),
+                  const SizedBox(width: 20),
+                  Expanded(
+                    child: Text(
+                      level.name.toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.5,
+                        color: isSelected ? Colors.white : const Color(0xFF2D2D2D),
+                      ),
                     ),
                   ),
-                ),
-                Icon(
-                  Icons.play_arrow_rounded,
-                  color: isSelected ? Colors.white : Colors.black26,
-                  size: 40,
-                ),
-              ],
+                  Icon(
+                    isSelected ? Icons.check_circle_rounded : Icons.play_arrow_rounded,
+                    color: isSelected ? Colors.white : Colors.black26,
+                    size: 40,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -300,11 +292,11 @@ class _StartGameButtonState extends State<_StartGameButton> {
           width: double.infinity,
           constraints: const BoxConstraints(maxWidth: 400),
           decoration: BoxDecoration(
-            color: widget.onPressed != null ? Colors.greenAccent.shade700 : Colors.grey.shade400,
+            color: widget.onPressed != null ? Colors.green.shade600 : Colors.grey.shade400,
             borderRadius: BorderRadius.circular(40),
             boxShadow: widget.onPressed != null ? [
               BoxShadow(
-                color: Colors.greenAccent.shade700.withOpacity(0.3),
+                color: Colors.green.withOpacity(0.3),
                 blurRadius: 15,
                 offset: const Offset(0, 8),
               ),
@@ -353,12 +345,10 @@ class _MascotBubbleState extends State<MascotBubble> with TickerProviderStateMix
       vsync: this,
       duration: const Duration(seconds: 2),
     )..repeat(reverse: true);
-
     _floatAnimation = Tween<Offset>(
       begin: Offset.zero,
       end: const Offset(0, -0.1),
     ).animate(CurvedAnimation(parent: _floatController, curve: Curves.easeInOut));
-
     _tapController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
@@ -390,7 +380,6 @@ class _MascotBubbleState extends State<MascotBubble> with TickerProviderStateMix
       alignment: Alignment.bottomRight,
       clipBehavior: Clip.none,
       children: [
-        // Speech Bubble
         Positioned(
           bottom: 80,
           right: 0,
@@ -422,7 +411,6 @@ class _MascotBubbleState extends State<MascotBubble> with TickerProviderStateMix
             ),
           ),
         ),
-        // Mascot
         SlideTransition(
           position: _floatAnimation,
           child: ScaleTransition(
