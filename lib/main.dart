@@ -21,7 +21,7 @@ class PopCountApp extends StatelessWidget {
           primary: const Color(0xFF2196F3),
           secondary: const Color(0xFFF06292),
         ),
-        textTheme: GoogleFonts.fredokaOneTextTheme(),
+        textTheme: GoogleFonts.baloo2TextTheme(),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
